@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id 'kotlin-kapt'
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -42,8 +44,10 @@ android {
     packaging {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes.add('/META-INF/gradle/incremental.annotation.processors')
         }
     }
+    configurations { implementation.exclude group: 'org.jetbrains', module: 'annotations' }
 }
 
 dependencies {
@@ -63,4 +67,11 @@ dependencies {
     androidTestImplementation libs.androidx.ui.test.junit4
     debugImplementation libs.androidx.ui.tooling
     debugImplementation libs.androidx.ui.test.manifest
+
+//    //컴포즈 뷰모델
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    //    //hilt
+    implementation 'com.google.dagger:hilt-android:2.48'
+    kapt 'com.google.dagger:hilt-compiler:2.48'
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
 }
