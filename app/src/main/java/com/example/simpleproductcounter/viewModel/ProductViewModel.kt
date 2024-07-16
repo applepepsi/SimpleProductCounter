@@ -60,6 +60,7 @@ class ProductViewModel  @Inject constructor(
 
     val setShowDeleteIcon: State<Boolean> = _setShowDeleteIcon
 
+
     init{
         getAllProductData()
         getAllProductCount()
@@ -240,6 +241,17 @@ class ProductViewModel  @Inject constructor(
                     Log.d("allProductCount", allProductCount.toString())
                     _allProductCount.value = allProductCount
                 }
+        }
+    }
+
+    fun itemCountUp(){
+        val currentCount = _selectDistributorData.value.count
+        _selectDistributorData.value = _selectDistributorData.value.copy(count = currentCount + 1)
+    }
+    fun itemCountDown(){
+        val currentCount = _selectDistributorData.value.count
+        if(currentCount>1){
+            _selectDistributorData.value = _selectDistributorData.value.copy(count = currentCount - 1)
         }
     }
 

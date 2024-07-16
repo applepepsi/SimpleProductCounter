@@ -27,7 +27,7 @@ interface ItemDataDao {
     fun getAllProductData(): Flow<List<ItemAndDistributors>>
 
     @Transaction
-    @Query("SELECT SUM(count) FROM DBDistributor")
+    @Query("SELECT IFNULL(SUM(count), 0) FROM DBDistributor")
     fun getAllProductCounter(): Flow<Int>
 
     @Query("UPDATE DBDistributor SET distributor=:newDistributor, count=:count ,itemId = :dbBrandIdNum WHERE id = :id")

@@ -81,11 +81,32 @@ fun ItemComponent(
                 verticalAlignment = Alignment.CenterVertically
 
             ) {
+                if(productViewModel.setShowDeleteIcon.value){
+                    IconButton(
+                        onClick = {
+                            productViewModel.setSelectBrand(singleBrand)
+                            productViewModel.deleteBrandName()
+                        },
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .size(37.dp)
+
+                    ){
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.delete_button),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
                 TextButton(
+
                     onClick = {
                         productViewModel.setSelectBrand(singleBrand)
                         productViewModel.toggleShowBrandModifyDialog()
-                    }
+                    },
+                    modifier = Modifier
                 )
                 {
                     Text(
@@ -99,24 +120,7 @@ fun ItemComponent(
                         modifier = Modifier.padding(end=10.dp)
                     )
                 }
-                if(productViewModel.setShowDeleteIcon.value){
-                    IconButton(
-                        onClick = {
-                            productViewModel.setSelectBrand(singleBrand)
-                            productViewModel.deleteBrandName()
-                        },
-                        modifier = Modifier
-                            .size(20.dp)
 
-
-                    ){
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.delete_button),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-                }
             }
 
             DividerComponent()
@@ -323,7 +327,8 @@ fun ModifyOrAddProductDataDialog(
                 modifier = Modifier
                     .padding(start=5.dp,end=5.dp)
                     ,
-                horizontalArrangement = Arrangement.SpaceAround
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
             ){
                 TextField(
                     shape = RoundedCornerShape(10.dp),
@@ -371,6 +376,41 @@ fun ModifyOrAddProductDataDialog(
                         .weight(1f)
                         .border(width = 1.dp, color = Color.Gray)
                 )
+
+                Column(
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    IconButton(
+                        onClick = {
+                            productViewModel.itemCountUp()
+                        },
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .size(37.dp)
+
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.up_button),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                    IconButton(
+                        onClick = {
+                            productViewModel.itemCountDown()
+                        },
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .size(37.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.down_button),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
             }
 
             Spacer(modifier = Modifier.height(20.dp))
