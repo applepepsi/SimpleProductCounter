@@ -48,7 +48,6 @@ import com.example.simpleproductcounter.R
 import com.example.simpleproductcounter.data.Distributor
 import com.example.simpleproductcounter.data.ItemData
 import com.example.simpleproductcounter.repository.TestRepository
-import com.example.simpleproductcounter.ui.theme.Background_Color2
 import com.example.simpleproductcounter.viewModel.ProductViewModel
 
 @Composable
@@ -56,12 +55,15 @@ fun ItemComponent(
     singleBrand: ItemData,
     productViewModel: ProductViewModel
 ) {
+
+
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
 
-            .padding(bottom = 5.dp)
-
+            .padding(10.dp)
+            .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
     ) {
 
 
@@ -70,20 +72,51 @@ fun ItemComponent(
                 .fillMaxWidth(),
 
         ) {
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 5.dp, start = 10.dp),
-                contentAlignment = Alignment.CenterStart
+
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+
             ) {
-                Text(
-                    text = singleBrand.brand,
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontStyle = FontStyle.Normal,
-                    ),
+                TextButton(
+                    onClick = {
+                        productViewModel.setSelectBrand(singleBrand)
+                        productViewModel.toggleShowBrandModifyDialog()
+                    }
                 )
+                {
+                    Text(
+                        text = singleBrand.brand,
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontStyle = FontStyle.Normal,
+                        ),
+                        color = Color.Black,
+                        modifier = Modifier.padding(end=10.dp)
+                    )
+                }
+                if(productViewModel.setShowDeleteIcon.value){
+                    IconButton(
+                        onClick = {
+                            productViewModel.setSelectBrand(singleBrand)
+                            productViewModel.deleteBrandName()
+                        },
+                        modifier = Modifier
+                            .size(20.dp)
+
+
+                    ){
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.delete_button),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
             }
 
             DividerComponent()
@@ -91,35 +124,62 @@ fun ItemComponent(
             for(i in singleBrand.distributor) {
                 DistributorComponent(
                     singleItem = i,
-                    deleteItem = {},
+                    deleteItem = {
+                        productViewModel.deleteDistributorData()
+                    },
                     toggleDialogState = {
                         productViewModel.toggleShowItemModifyDialog()
                     },
                     setSelectDistributor={
                         productViewModel.setSelectItemData(i)
-                    }
+                    },
+                    setSelectBrand={
+                        productViewModel.setSelectBrand(singleBrand)
+                    },
+                    deleteButtonVisibility = productViewModel.setShowDeleteIcon.value
                 )
             }
         }
 
-        TextButton(
-            onClick = {
-                productViewModel.setSelectBrand(singleBrand.brandId)
-                productViewModel.toggleShowItemAddDialog()
-            },
-            content = {
-                Text(
-                    text = "추가하기",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontStyle = FontStyle.Normal,
-                    ),
-                    color = Color.DarkGray
-                )
-            },
-            modifier = Modifier.align(Alignment.End)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+            ,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+
+
+
+            TextButton(
+                onClick = {
+                    productViewModel.setSelectBrand(singleBrand)
+                    productViewModel.toggleShowItemAddDialog()
+                },
+                content = {
+                    Text(
+                        text = "추가하기",
+                        style = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontStyle = FontStyle.Normal,
+                        ),
+                        color = Color.DarkGray
+                    )
+                },
+//                modifier = Modifier.align(Alignment.End)
+            )
+
+            Text(
+                text="합계: ${singleBrand.distributor.sumOf { it.count }}",
+                modifier = Modifier.padding(end=10.dp),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontStyle = FontStyle.Normal,
+                ),
+            )
+        }
     }
 
 
@@ -131,6 +191,8 @@ fun DistributorComponent(
     setSelectDistributor:()->Unit,
     deleteItem:()->Unit,
     toggleDialogState:()->Unit,
+    setSelectBrand:()->Unit,
+    deleteButtonVisibility:Boolean=false
 ) {
 
 
@@ -140,6 +202,7 @@ fun DistributorComponent(
             .fillMaxWidth()
 
             .clickable {
+                setSelectBrand()
                 setSelectDistributor()
                 toggleDialogState()
             },
@@ -185,18 +248,21 @@ fun DistributorComponent(
                 textAlign = TextAlign.Center
             )
 
-            IconButton(
-                onClick = {
-                    deleteItem()
-                },
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-            ){
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.delete_button),
-                    contentDescription = null,
-                    modifier = Modifier.size(10.dp),
-                )
+            if(deleteButtonVisibility){
+                IconButton(
+                    onClick = {
+                        setSelectDistributor()
+                        deleteItem()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                ){
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.delete_button),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
     }
@@ -224,6 +290,7 @@ fun DividerComponent(
 fun ModifyOrAddProductDataDialog(
     productViewModel: ProductViewModel,
     toggleDialogState: () -> Unit,
+    kindOfPost:()->Unit,
     value:String="추가 하기"
     ){
 
@@ -265,7 +332,7 @@ fun ModifyOrAddProductDataDialog(
                         productViewModel.updateModifyDistributorText(it)
 
                     },
-
+                    maxLines = 1,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
@@ -274,7 +341,9 @@ fun ModifyOrAddProductDataDialog(
 
                     ),
 
-                    modifier = Modifier.weight(1f).border(width = 1.dp, color = Color.Gray)
+                    modifier = Modifier
+                        .weight(1f)
+                        .border(width = 1.dp, color = Color.Gray)
                 )
 
                 Spacer(modifier = Modifier.width(5.dp))
@@ -283,8 +352,12 @@ fun ModifyOrAddProductDataDialog(
                     shape = RoundedCornerShape(10.dp),
                     value = productViewModel.selectDistributorData.value.count.toString(),
                     onValueChange = {
-                        productViewModel.updateModifyCount(it.toInt())
+                        if(it.isNotEmpty()){
+                            productViewModel.updateModifyCount(it.toInt())
+
+                        }
                     },
+                    maxLines = 1,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.NumberPassword
                     ),
@@ -294,7 +367,9 @@ fun ModifyOrAddProductDataDialog(
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
-                    modifier = Modifier.weight(1f).border(width = 1.dp, color = Color.Gray)
+                    modifier = Modifier
+                        .weight(1f)
+                        .border(width = 1.dp, color = Color.Gray)
                 )
             }
 
@@ -307,7 +382,7 @@ fun ModifyOrAddProductDataDialog(
             ) {
                 TextButton(
                     onClick = {
-                        productViewModel.postAddDistributor()
+                        kindOfPost()
                         toggleDialogState()
                     },
                     modifier = Modifier
@@ -345,9 +420,10 @@ fun ModifyOrAddProductDataDialog(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AddBrandDialog(
+fun ModifyOrAddBrandDialog(
     productViewModel: ProductViewModel,
     toggleDialogState: () -> Unit,
+    kindOfPost:()->Unit,
     value:String="브랜드 추가"
 ){
 
@@ -373,7 +449,7 @@ fun AddBrandDialog(
             Text(
                 text=value,
                 modifier = Modifier
-                    .padding(start=10.dp,bottom=5.dp)
+                    .padding(start = 10.dp, bottom = 5.dp)
                     .align(Alignment.Start)
             )
 
@@ -384,12 +460,12 @@ fun AddBrandDialog(
             ){
                 TextField(
                     shape = RoundedCornerShape(10.dp),
-                    value = productViewModel.singleBrandText.value,
+                    value = productViewModel.selectBrand.value.brand,
                     onValueChange = {
                         productViewModel.updateBrandText(it)
 
                     },
-
+                    maxLines = 1,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
@@ -412,13 +488,13 @@ fun AddBrandDialog(
                 ) {
                 TextButton(
                     onClick = {
-                        productViewModel.postBrandName()
+                        kindOfPost()
                         toggleDialogState()
                     },
                     modifier = Modifier
                 ) {
                     Text(
-                        text = "추가",
+                        text = "확인",
                         style = TextStyle(
                             fontStyle = FontStyle.Normal,
                             fontSize = 12.sp
@@ -501,7 +577,7 @@ fun ModifyProductPreview() {
     val productViewModel=ProductViewModel(testRepository)
 
     MaterialTheme {
-        ModifyOrAddProductDataDialog(productViewModel, toggleDialogState = { productViewModel.toggleShowItemModifyDialog() })
+        ModifyOrAddProductDataDialog(productViewModel, toggleDialogState = { productViewModel.toggleShowItemModifyDialog()},kindOfPost = {})
     }
 }
 
@@ -513,6 +589,6 @@ fun AddBrandPreview() {
     val productViewModel=ProductViewModel(testRepository)
 
     MaterialTheme {
-        AddBrandDialog(productViewModel, toggleDialogState = { productViewModel.toggleShowItemModifyDialog() })
+        ModifyOrAddBrandDialog(productViewModel, toggleDialogState = { productViewModel.toggleShowItemModifyDialog() }, kindOfPost = {})
     }
 }

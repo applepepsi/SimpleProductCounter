@@ -9,14 +9,14 @@ interface ItemDataDao {
     @Insert
     suspend fun insertBrand(dbItemData: DBItemData): Long
 
-    @Delete
-    suspend fun deleteBrand(dbItemData: DBItemData)
+    @Query("DELETE FROM DBItemData WHERE id = :brandIdNum")
+    suspend fun deleteBrand(brandIdNum: Int)
 
     @Insert
     suspend fun insertDistributor(dbDistributor: DBDistributor)
 
-    @Delete
-    suspend fun deleteDistributor(dbDistributor: DBDistributor)
+    @Query("DELETE FROM DBDistributor WHERE id = :dbDistributorIdNum")
+    suspend fun deleteDistributor(dbDistributorIdNum: Int)
 
 
 
@@ -25,4 +25,14 @@ interface ItemDataDao {
     @Transaction
     @Query("SELECT * FROM DBItemData")
     fun getAllProductData(): Flow<List<ItemAndDistributors>>
+
+    @Transaction
+    @Query("SELECT SUM(count) FROM DBDistributor")
+    fun getAllProductCounter(): Flow<Int>
+
+    @Query("UPDATE DBDistributor SET distributor=:newDistributor, count=:count ,itemId = :dbBrandIdNum WHERE id = :id")
+    suspend fun modifyDistributor(dbBrandIdNum: Int,newDistributor:String,count:Int,id:Int)
+
+    @Query("UPDATE DBItemData SET brand=:newBrandName WHERE id = :brandIdNum")
+    suspend fun modifyBrand(brandIdNum: Int,newBrandName:String)
 }

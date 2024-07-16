@@ -45,14 +45,24 @@ class ProductViewModel  @Inject constructor(
 
     val setShowBrandAddDialog: State<Boolean> = _setShowBrandAddDialog
 
-    private var _singleBrandText= mutableStateOf("")
+    private var _setShowBrandModifyDialog= mutableStateOf(false)
 
-    val singleBrandText: State<String> = _singleBrandText
+    val setShowBrandModifyDialog: State<Boolean> = _setShowBrandModifyDialog
 
-    private var _selectBrand= mutableStateOf(0)
-    val selectBrand: State<Int> = _selectBrand
+    private var _selectBrand= mutableStateOf(ItemData())
+    val selectBrand: State<ItemData> = _selectBrand
+
+
+    private var _allProductCount= mutableStateOf(0)
+    val allProductCount: State<Int> = _allProductCount
+
+    private var _setShowDeleteIcon= mutableStateOf(true)
+
+    val setShowDeleteIcon: State<Boolean> = _setShowDeleteIcon
+
     init{
         getAllProductData()
+        getAllProductCount()
     }
 
 
@@ -84,12 +94,25 @@ class ProductViewModel  @Inject constructor(
         }
     }
 
+    fun toggleShowBrandModifyDialog(){
+        _setShowBrandModifyDialog.value=!_setShowBrandModifyDialog.value
+        Log.d("_setShowItemModifyDialog.value", _setShowBrandModifyDialog.value.toString())
+        if(!_setShowBrandModifyDialog.value){
+            resetBrandData()
+        }
+    }
+
+    fun toggleSetShowDeleteIcon(){
+        _setShowDeleteIcon.value=!_setShowDeleteIcon.value
+
+    }
+
     private fun resetSelectData() {
         _selectDistributorData.value = Distributor()
     }
 
     private fun resetBrandData() {
-        _singleBrandText.value=""
+        _selectBrand.value=ItemData()
     }
 
 
@@ -107,7 +130,7 @@ class ProductViewModel  @Inject constructor(
     }
 
     fun updateBrandText(value:String){
-        _singleBrandText.value = value
+        _selectBrand.value = _selectBrand.value.copy(brand = value)
     }
 
 
@@ -115,23 +138,63 @@ class ProductViewModel  @Inject constructor(
     fun postBrandName(){
         viewModelScope.launch {
 
-            productRepository.insertBrand(DBItemData(brand = singleBrandText.value))
+            productRepository.insertBrand(DBItemData(brand = selectBrand.value.brand))
         }
     }
 
+    fun postModifyBrandName(){
+        viewModelScope.launch {
 
+            Log.d("DBItemData(brand = selectBrand.value.brand)",
+                DBItemData(brand = selectBrand.value.brand).toString()
+            )
+            productRepository.modifyBrand(DBItemData(selectBrand.value.brandId,selectBrand.value.brand))
+        }
+    }
 
     fun postAddDistributor(){
 
         val addDistributorData=DBDistributor(
             distributor = _selectDistributorData.value.distributor,
             count = _selectDistributorData.value.count,
-            itemId = _selectBrand.value
+            itemId = _selectBrand.value.brandId
         )
+
 
         viewModelScope.launch {
 
             productRepository.insertDistributor(addDistributorData)
+        }
+    }
+
+    fun postModifyDistributor(){
+        val addDistributorData=DBDistributor(
+            id=_selectDistributorData.value.distributorId,
+            distributor = _selectDistributorData.value.distributor,
+            count = _selectDistributorData.value.count,
+            itemId = _selectBrand.value.brandId
+        )
+        viewModelScope.launch {
+            Log.d("addDistributorData",
+                addDistributorData.toString()
+            )
+            productRepository.modifyDistributor(addDistributorData)
+        }
+    }
+
+    fun deleteBrandName(){
+        viewModelScope.launch {
+
+            productRepository.deleteBrand(_selectBrand.value.brandId)
+        }
+    }
+
+    fun deleteDistributorData(){
+        viewModelScope.launch {
+            Log.d("_selectDistributorData.value.distributorId",
+                _selectDistributorData.value.distributorId.toString()
+            )
+            productRepository.deleteDistributor(_selectDistributorData.value.distributorId)
         }
     }
 
@@ -142,6 +205,7 @@ class ProductViewModel  @Inject constructor(
                     val itemDataList = allProductDataList.toItemDataList()
                     _brandDataList.value = itemDataList
                 }
+
         }
     }
 
@@ -164,8 +228,19 @@ class ProductViewModel  @Inject constructor(
         return this.map { it.toItemData() }
     }
 
-    fun setSelectBrand(brandId: Int) {
+    fun setSelectBrand(brandId: ItemData) {
+        Log.d("selectBrand", brandId.toString())
         _selectBrand.value=brandId
+    }
+
+    fun getAllProductCount() {
+        viewModelScope.launch {
+            productRepository.getAllProductCount()
+                .collect { allProductCount->
+                    Log.d("allProductCount", allProductCount.toString())
+                    _allProductCount.value = allProductCount
+                }
+        }
     }
 
 }

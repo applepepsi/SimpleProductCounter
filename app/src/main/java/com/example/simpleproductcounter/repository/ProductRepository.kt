@@ -9,12 +9,19 @@ interface ProductRepository {
 
     suspend fun insertBrand(dbItemData: DBItemData)
 
-    suspend fun deleteBrand(dbItemData: DBItemData)
+    suspend fun deleteBrand(brandIdNum: Int)
+
+    suspend fun modifyBrand(dbItemData: DBItemData)
 
     suspend fun insertDistributor(dbDistributor: DBDistributor)
 
-    suspend fun deleteDistributor(dbDistributor: DBDistributor)
+    suspend fun deleteDistributor(dbDistributorIdNum: Int)
+
+    suspend fun modifyDistributor(dbDistributor: DBDistributor)
+
+
 
     fun getAllProductData(): Flow<List<ItemAndDistributors>>
 
+    fun getAllProductCount(): Flow<Int>
 }
