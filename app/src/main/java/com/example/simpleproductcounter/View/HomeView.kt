@@ -26,6 +26,7 @@ import com.example.simpleproductcounter.component.ItemComponent
 import com.example.simpleproductcounter.component.ModifyOrAddProductDataDialog
 import com.example.simpleproductcounter.data.Distributor
 import com.example.simpleproductcounter.data.ItemData
+import com.example.simpleproductcounter.repository.TestRepository
 import com.example.simpleproductcounter.viewModel.ProductViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -73,7 +74,7 @@ fun MainView(){
         ) {
 
             item{
-                for(singleBrand in testData){
+                for(singleBrand in productViewModel.brandDataList.value){
                     ItemComponent(
                         singleBrand=singleBrand,
                         productViewModel
@@ -143,8 +144,9 @@ val testData= listOf(
 @Preview(showBackground = true)
 @Composable
 fun HomeViewPreview() {
+    val testRepository= TestRepository()
+    val productViewModel=ProductViewModel(testRepository)
 
-    val productViewModel=ProductViewModel()
 
     MaterialTheme {
         MainView()

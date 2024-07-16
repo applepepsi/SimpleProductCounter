@@ -47,6 +47,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.simpleproductcounter.R
 import com.example.simpleproductcounter.data.Distributor
 import com.example.simpleproductcounter.data.ItemData
+import com.example.simpleproductcounter.repository.TestRepository
 import com.example.simpleproductcounter.ui.theme.Background_Color2
 import com.example.simpleproductcounter.viewModel.ProductViewModel
 
@@ -103,6 +104,7 @@ fun ItemComponent(
 
         TextButton(
             onClick = {
+                productViewModel.setSelectBrand(singleBrand.brandId)
                 productViewModel.toggleShowItemAddDialog()
             },
             content = {
@@ -191,7 +193,7 @@ fun DistributorComponent(
                     .align(Alignment.CenterEnd)
             ){
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_baseline_cancle_24),
+                    imageVector = ImageVector.vectorResource(R.drawable.delete_button),
                     contentDescription = null,
                     modifier = Modifier.size(10.dp),
                 )
@@ -261,6 +263,7 @@ fun ModifyOrAddProductDataDialog(
                     value = productViewModel.selectDistributorData.value.distributor,
                     onValueChange = {
                         productViewModel.updateModifyDistributorText(it)
+
                     },
 
                     colors = TextFieldDefaults.colors(
@@ -282,7 +285,9 @@ fun ModifyOrAddProductDataDialog(
                     onValueChange = {
                         productViewModel.updateModifyCount(it.toInt())
                     },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.NumberPassword
+                    ),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
@@ -302,7 +307,8 @@ fun ModifyOrAddProductDataDialog(
             ) {
                 TextButton(
                     onClick = {
-
+                        productViewModel.postAddDistributor()
+                        toggleDialogState()
                     },
                     modifier = Modifier
                 ) {
@@ -381,6 +387,7 @@ fun AddBrandDialog(
                     value = productViewModel.singleBrandText.value,
                     onValueChange = {
                         productViewModel.updateBrandText(it)
+
                     },
 
                     colors = TextFieldDefaults.colors(
@@ -405,7 +412,8 @@ fun AddBrandDialog(
                 ) {
                 TextButton(
                     onClick = {
-
+                        productViewModel.postBrandName()
+                        toggleDialogState()
                     },
                     modifier = Modifier
                 ) {
@@ -466,7 +474,8 @@ fun AddBrandDialog(
 @Preview(showBackground = true)
 @Composable
 fun ItemComponentPreview() {
-    val productViewModel=ProductViewModel()
+    val testRepository=TestRepository()
+    val productViewModel=ProductViewModel(testRepository)
 
     MaterialTheme {
         ItemComponent(
@@ -488,8 +497,8 @@ fun ItemComponentPreview() {
 @Preview(showBackground = true)
 @Composable
 fun ModifyProductPreview() {
-
-    val productViewModel=ProductViewModel()
+    val testRepository=TestRepository()
+    val productViewModel=ProductViewModel(testRepository)
 
     MaterialTheme {
         ModifyOrAddProductDataDialog(productViewModel, toggleDialogState = { productViewModel.toggleShowItemModifyDialog() })
@@ -500,8 +509,8 @@ fun ModifyProductPreview() {
 @Preview(showBackground = true)
 @Composable
 fun AddBrandPreview() {
-
-    val productViewModel=ProductViewModel()
+    val testRepository=TestRepository()
+    val productViewModel=ProductViewModel(testRepository)
 
     MaterialTheme {
         AddBrandDialog(productViewModel, toggleDialogState = { productViewModel.toggleShowItemModifyDialog() })
